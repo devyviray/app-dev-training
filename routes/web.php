@@ -21,15 +21,6 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
-
-// Route::group(['prefix' => 'users'], function () {
-//     Route::get('/lists', 'UserController@index')->name('users.list');
-//     Route::get('/store', 'UserController@store');
-// });
-
 Route::get('/users/lists', 'UserController@index')->name('users.list')->middleware('auth');
 
-Auth::routes();
-
-
-Route::get('/home', 'HomeController@index')->name('home');
+Route::resource('products','ProductController');
