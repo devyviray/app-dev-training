@@ -3,7 +3,7 @@
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
             <h1 class="h2">Products</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
-                <button type="button" @click="createProduct()" class="btn btn-sm btn-outline-primary">New</button>
+                <button type="button" @click="openModal()" class="btn btn-sm btn-outline-primary">New</button>
             </div> 
         </div>
 
@@ -50,6 +50,7 @@
 
             <!-- modal component -->
             <modal-product 
+                @return="pushNewProduct($event)"
                 @close="show = $event"
                 :show="show">
             </modal-product>
@@ -85,9 +86,15 @@
         },
 
         methods: {
-            createProduct() {
+
+            openModal() {
                 this.show = !this.show;
             },
+
+            pushNewProduct(event) {
+                this.products.push(event);
+            },
+
             fetchProducts() {
                 this.loading = true;
                 axios.get(`/api/products`)

@@ -1934,7 +1934,8 @@ __webpack_require__.r(__webpack_exports__);
   },
   data: function data() {
     return {
-      form: {
+      errors: [],
+      product: {
         name: '',
         detail: ''
       }
@@ -1957,6 +1958,27 @@ __webpack_require__.r(__webpack_exports__);
       this.$emit('close', false);
       $("#modalProduct").modal("hide");
       this.downloading = false;
+    },
+    store: function store() {
+      var _this = this;
+
+      console.log('check if store is triggered');
+      axios.post("api/products", {
+        name: this.product.name,
+        detail: this.product.detail
+      }).then(function (response) {
+        if (response.status === 200 || response.status === 201) {
+          _this.close();
+
+          _this.$emit('return', response.data); // this.$toastr('success','Created Successfully');
+
+        }
+      })["catch"](function (error) {
+        // this.$toastr('warning', `Error found`)
+        if (error.response.status === 422) {
+          _this.errors = error.response.data.errors;
+        }
+      });
     }
   }
 });
@@ -1995,8 +2017,11 @@ __webpack_require__.r(__webpack_exports__);
     this.fetchProducts();
   },
   methods: {
-    createProduct: function createProduct() {
+    openModal: function openModal() {
       this.show = !this.show;
+    },
+    pushNewProduct: function pushNewProduct(event) {
+      this.products.push(event);
     },
     fetchProducts: function fetchProducts() {
       var _this = this;
@@ -2123,7 +2148,77 @@ var render = function render() {
     attrs: {
       "aria-hidden": "true"
     }
-  }, [_vm._v("×")])])]), _vm._v(" "), _vm._m(0), _vm._v(" "), _c("div", {
+  }, [_vm._v("×")])])]), _vm._v(" "), _c("div", {
+    staticClass: "modal-body"
+  }, [_c("form", [_c("div", {
+    staticClass: "form-group",
+    "class": {
+      " has-danger": _vm.errors.name
+    }
+  }, [_c("label", {
+    staticClass: "col-form-label"
+  }, [_vm._v("Product Name:")]), _vm._v(" "), _c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.product.name,
+      expression: "product.name"
+    }],
+    staticClass: "form-control acc_format",
+    "class": {
+      "is-invalid": _vm.errors.name
+    },
+    attrs: {
+      type: "text",
+      id: "name",
+      placeholder: "Enter Name"
+    },
+    domProps: {
+      value: _vm.product.name
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+
+        _vm.$set(_vm.product, "name", $event.target.value);
+      }
+    }
+  }), _vm._v(" "), _vm.errors.name ? _c("div", {
+    staticClass: "invalid-feedback"
+  }, [_vm._v(_vm._s(_vm.errors.name[0]))]) : _vm._e()]), _vm._v(" "), _c("div", {
+    staticClass: "form-group",
+    "class": {
+      " has-danger": _vm.errors.detail
+    }
+  }, [_c("label", {
+    staticClass: "col-form-label"
+  }, [_vm._v("Detail:")]), _vm._v(" "), _c("textarea", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.product.detail,
+      expression: "product.detail"
+    }],
+    staticClass: "form-control",
+    "class": {
+      "is-invalid": _vm.errors.detail
+    },
+    attrs: {
+      id: "message-text"
+    },
+    domProps: {
+      value: _vm.product.detail
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+
+        _vm.$set(_vm.product, "detail", $event.target.value);
+      }
+    }
+  }), _vm._v(" "), _vm.errors.detail ? _c("div", {
+    staticClass: "invalid-feedback"
+  }, [_vm._v(_vm._s(_vm.errors.detail[0]))]) : _vm._e()])])]), _vm._v(" "), _c("div", {
     staticClass: "modal-footer"
   }, [_c("button", {
     staticClass: "btn btn-secondary",
@@ -2140,43 +2235,16 @@ var render = function render() {
     staticClass: "btn btn-primary",
     attrs: {
       type: "button"
+    },
+    on: {
+      click: function click($event) {
+        return _vm.store();
+      }
     }
-  }, [_vm._v("Send message")])])])])]);
+  }, [_vm._v("Submit")])])])])]);
 };
 
-var staticRenderFns = [function () {
-  var _vm = this,
-      _c = _vm._self._c;
-
-  return _c("div", {
-    staticClass: "modal-body"
-  }, [_c("form", [_c("div", {
-    staticClass: "form-group"
-  }, [_c("label", {
-    staticClass: "col-form-label",
-    attrs: {
-      "for": "recipient-name"
-    }
-  }, [_vm._v("Recipient:")]), _vm._v(" "), _c("input", {
-    staticClass: "form-control",
-    attrs: {
-      type: "text",
-      id: "recipient-name"
-    }
-  })]), _vm._v(" "), _c("div", {
-    staticClass: "form-group"
-  }, [_c("label", {
-    staticClass: "col-form-label",
-    attrs: {
-      "for": "message-text"
-    }
-  }, [_vm._v("Message:")]), _vm._v(" "), _c("textarea", {
-    staticClass: "form-control",
-    attrs: {
-      id: "message-text"
-    }
-  })])])]);
-}];
+var staticRenderFns = [];
 render._withStripped = true;
 
 
@@ -2210,7 +2278,7 @@ var render = function render() {
     },
     on: {
       click: function click($event) {
-        return _vm.createProduct();
+        return _vm.openModal();
       }
     }
   }, [_vm._v("New")])])]), _vm._v(" "), _c("table", {
@@ -2252,6 +2320,9 @@ var render = function render() {
       show: _vm.show
     },
     on: {
+      "return": function _return($event) {
+        return _vm.pushNewProduct($event);
+      },
       close: function close($event) {
         _vm.show = $event;
       }

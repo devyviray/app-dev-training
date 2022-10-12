@@ -10,19 +10,21 @@
       </div>
       <div class="modal-body">
         <form>
-          <div class="form-group">
-            <label for="recipient-name" class="col-form-label">Product Name:</label>
-            <input type="text" class="form-control" id="recipient-name">
+          <div class="form-group" :class="{ ' has-danger' : errors.name }">
+            <label class="col-form-label">Product Name:</label>
+            <input type="text" :class="{ 'is-invalid' : errors.name }" class="form-control acc_format" id="name"  v-model="product.name" placeholder="Enter Name">
+            <div v-if="errors.name" class="invalid-feedback">{{ errors.name[0] }}</div>
           </div>
-          <div class="form-group">
-            <label for="message-text" class="col-form-label">Detail:</label>
-            <textarea class="form-control" id="message-text"></textarea>
+          <div class="form-group" :class="{ ' has-danger' : errors.detail }">
+            <label class="col-form-label">Detail:</label>
+            <textarea class="form-control" v-model="product.detail" :class="{ 'is-invalid' : errors.detail }" id="message-text"></textarea>
+            <div v-if="errors.detail" class="invalid-feedback">{{ errors.detail[0] }}</div>
           </div>
         </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" @click="close()" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Send message</button>
+        <button type="button" class="btn btn-primary" @click="store()">Submit</button>
       </div>
     </div>
   </div>
@@ -40,7 +42,8 @@
 
         data() {
             return {
-                form: {
+                errors: [],
+                product: {
                     name: '',
                     detail: ''
                 }
@@ -61,11 +64,39 @@
         },
 
         methods: {
+
             close() {
                 this.$emit('close', false);
                 $(`#modalProduct`).modal("hide");
                 this.downloading = false
             },
+
+            store() {
+
+              console.log('check if store is triggered')
+
+              axios.post(`api/products`,{
+                name: this.product.name,
+                detail: this.product.detail
+              })
+              .then(response => {
+
+                if(response.status === 200 || response.status === 201) {
+                    this.close();
+                    this.$emit('return', response.data)
+                    // this.$toastr('success','Created Successfully');
+                }
+
+              })
+              .catch(error => {
+                  // this.$toastr('warning', `Error found`)
+                  if(error.response.status === 422) {
+                      this.errors = error.response.data.errors;
+                  }
+              })  
+            },
+
+
         }
 
 
