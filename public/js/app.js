@@ -1931,7 +1931,6 @@ __webpack_require__.r(__webpack_exports__);
       type: Boolean,
       "default": false
     },
-    // edit values
     product: {
       type: Object,
       "default": {}
@@ -1988,9 +1987,10 @@ __webpack_require__.r(__webpack_exports__);
     update: function update(id) {
       var _this2 = this;
 
+      var toUpdateProduct = this.product;
       axios.patch("api/products/".concat(id), {
-        name: this.product.name,
-        detail: this.product.detail
+        name: toUpdateProduct.name,
+        detail: toUpdateProduct.detail
       }).then(function (response) {
         if (response.status === 200 || response.status === 201) {
           _this2.close();
@@ -2052,12 +2052,6 @@ __webpack_require__.r(__webpack_exports__);
     pushNewProduct: function pushNewProduct(event) {
       this.products.data.push(event);
     },
-    updateProduct: function updateProduct(event) {
-      var findProduct = this.products.data.findIndex(function (x) {
-        return x.id === event.id;
-      });
-      this.products.data[findProduct] = event;
-    },
     fetchProducts: function fetchProducts() {
       var _this = this;
 
@@ -2078,10 +2072,19 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     modifyProduct: function modifyProduct(product) {
-      console.log('check product:', product);
       this.show = !this.show;
       this.product = product;
       this.isForEdit = true;
+    },
+    // event = new product {id, name, detail, created_at, updated_at}
+    // find index in prodcuts wherin the value is the event.id (1) == current product where in the id == 1
+    // current view of the products === updated event
+    // as a result the product entry will change based form event data
+    updateProduct: function updateProduct(event) {
+      var findProduct = this.products.data.findIndex(function (x) {
+        return x.id === event.id;
+      });
+      this.products.data[findProduct] = event;
     },
     prevPage: function prevPage() {
       var _this3 = this;
@@ -2342,7 +2345,7 @@ var render = function render() {
     staticClass: "d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3"
   }, [_c("h1", {
     staticClass: "h2"
-  }, [_vm._v("Products")]), _vm._v(" "), _c("div", {
+  }, [_vm._v("All Products")]), _vm._v(" "), _c("div", {
     staticClass: "btn-toolbar mb-2 mb-md-0"
   }, [_c("button", {
     staticClass: "btn btn-sm btn-outline-primary",
@@ -2412,11 +2415,11 @@ var render = function render() {
       resetEdit: function resetEdit($event) {
         _vm.isForEdit = $event;
       },
-      "return": function _return($event) {
-        return _vm.pushNewProduct($event);
-      },
       returnUpdate: function returnUpdate($event) {
         return _vm.updateProduct($event);
+      },
+      "return": function _return($event) {
+        return _vm.pushNewProduct($event);
       },
       close: function close($event) {
         _vm.show = $event;

@@ -108,9 +108,12 @@
 
 
             update(id) {
+
+              let toUpdateProduct = this.product;
+
               axios.patch(`api/products/${id}`,{
-                name: this.product.name,
-                detail: this.product.detail
+                name: toUpdateProduct.name,
+                detail: toUpdateProduct.detail
               })
               .then(response => {
                 if(response.status === 200 || response.status === 201) {
