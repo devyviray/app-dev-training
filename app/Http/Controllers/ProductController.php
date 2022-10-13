@@ -78,11 +78,11 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required', 
             'detail' => 'required',
         ]);
   
-        $product->update($request->all());
+        $product->update($request->all()); // itong function is to update changes in datatable
   
         return redirect()->route('products.index')
                         ->with('success','Product updated successfully');
