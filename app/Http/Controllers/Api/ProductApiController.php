@@ -15,7 +15,7 @@ class ProductApiController extends Controller
      */
     public function index()
     {
-        return Product::paginate(5);
+        return Product::orderBy('id','desc')->paginate(5);
     }
 
 
@@ -62,7 +62,9 @@ class ProductApiController extends Controller
             'detail' => 'required',
         ]);
 
-        $product = Product::update($request->all());
+        $product->name = $request->name;
+        $product->detail = $request->detail;
+        $product->save();
         
         return $product;
     }

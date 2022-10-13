@@ -1,5 +1,6 @@
 <template>
     <div>
+
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
             <h1 class="h2">Products</h1>
             <div class="btn-toolbar mb-2 mb-md-0">
@@ -12,12 +13,17 @@
                 <tr>
                 <th scope="col">Product Name</th>
                 <th scope="col">Product Details</th>
+                <th scope="col">Option</th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-if="loading === false && products" v-for="(product,i) in products.data" :key="i">
                     <td>{{ product.name }}</td>
                     <td>{{ product.detail }}</td>
+                    <td>
+                        <button @click="modifyProduct(product)" class="btn btn-primary">Edit</button>
+                        <button @click="deleteProduct(i,product.id)" class="btn btn-danger">Delete</button>
+                    </td>
                 </tr>
 
                 <tr v-if="loading === true">
@@ -34,7 +40,7 @@
                     </td>
                 </tr>
             </tbody>
-            </table>
+        </table>
 
             <div class="row mb-3">
                 <div class="col-6">
@@ -50,6 +56,10 @@
 
             <!-- modal component -->
             <modal-product 
+                :product="product" 
+                :isForEdit="isForEdit"
+                @resetEdit="isForEdit = $event"
+                @returnUpdate="updateProduct($event)"
                 @return="pushNewProduct($event)"
                 @close="show = $event"
                 :show="show">
@@ -73,6 +83,8 @@
                 last_page_url: "",
                 next_page_url: "",
                 prev_page_url: "",
+                isForEdit: false,
+                product: {},
             }
         },
 
@@ -92,7 +104,7 @@
             },
 
             pushNewProduct(event) {
-                this.products.push(event);
+                this.products.data.push(event);
             },
 
             fetchProducts() {
@@ -104,6 +116,36 @@
                     this.loading = false;
                 })
             },
+
+            deleteProduct(index, id) {
+                axios.delete(`/api/products/${id}`)
+                .then(response => {
+                    if(response.status === 200 || response.status === 201) {
+                        this.products.data.splice(index,1);
+                    }
+                })
+            },
+
+            modifyProduct(product) {
+                this.show = !this.show;
+                this.product = product;
+                this.isForEdit = true;
+            },
+
+
+            // event = new product {id, name, detail, created_at, updated_at}
+            // find index in prodcuts wherin the value is the event.id (1) == current product where in the id == 1
+            // current view of the products === updated event
+            // as a result the product entry will change based form event data
+
+            updateProduct(event) {
+
+                let findProduct = this.products.data.findIndex(x => x.id === event.id);
+
+                this.products.data[findProduct] = event;
+                
+            },
+
             prevPage() {
                 this.loading = true
                 axios.get(`${this.products.prev_page_url}`)
